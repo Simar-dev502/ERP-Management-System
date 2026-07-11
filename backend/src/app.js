@@ -11,6 +11,7 @@ const ApiError = require('./utils/ApiError');
 // Route imports
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get('/api/health', (_req, res) => {
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
 // 404 handler
 app.use((req, _res, next) => {
