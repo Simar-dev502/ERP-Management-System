@@ -7,6 +7,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const errorHandler = require('./middleware/error');
 const ApiError = require('./utils/ApiError');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 
 // Route imports
 const authRoutes = require('./routes/authRoutes');
@@ -38,6 +40,9 @@ if (process.env.NODE_ENV === 'development') {
 app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'ERP API is running', timestamp: new Date().toISOString() });
 });
+
+// API Documentation
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 // Mount routes
 app.use('/api/auth', authRoutes);
