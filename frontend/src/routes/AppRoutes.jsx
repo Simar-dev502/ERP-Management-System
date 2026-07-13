@@ -1,4 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import Layout from '../components/Layout/Layout';
 import ProtectedRoute from '../components/common/ProtectedRoute';
 import RoleRoute from '../components/common/RoleRoute';
 import LoginPage from '../pages/auth/LoginPage';
@@ -13,17 +15,35 @@ import GrnPage from '../pages/grn/GrnPage';
 import InvoicesPage from '../pages/invoices/InvoicesPage';
 import UsersPage from '../pages/users/UsersPage';
 
-const AppRoutes = () => {
+const ProtectedLayout = ({ children, mode, toggleTheme }) => (
+  <Layout mode={mode} toggleTheme={toggleTheme}>
+    {children}
+  </Layout>
+);
+
+const AppRoutes = ({ mode, toggleTheme }) => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      {/* Public routes - no layout */}
+      <Route
+        path="/login"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+      />
 
+      {/* Protected routes with layout */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <DashboardPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -32,7 +52,9 @@ const AppRoutes = () => {
         path="/products"
         element={
           <ProtectedRoute>
-            <ProductsPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <ProductsPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -41,7 +63,9 @@ const AppRoutes = () => {
         path="/customers"
         element={
           <ProtectedRoute>
-            <CustomersPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <CustomersPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -50,7 +74,9 @@ const AppRoutes = () => {
         path="/suppliers"
         element={
           <ProtectedRoute>
-            <SuppliersPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <SuppliersPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -59,7 +85,9 @@ const AppRoutes = () => {
         path="/sales-orders"
         element={
           <ProtectedRoute>
-            <SalesOrdersPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <SalesOrdersPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -68,7 +96,9 @@ const AppRoutes = () => {
         path="/purchase-orders"
         element={
           <ProtectedRoute>
-            <PurchaseOrdersPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <PurchaseOrdersPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -77,7 +107,9 @@ const AppRoutes = () => {
         path="/grn"
         element={
           <ProtectedRoute>
-            <GrnPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <GrnPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -86,7 +118,9 @@ const AppRoutes = () => {
         path="/invoices"
         element={
           <ProtectedRoute>
-            <InvoicesPage />
+            <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+              <InvoicesPage />
+            </ProtectedLayout>
           </ProtectedRoute>
         }
       />
@@ -96,7 +130,9 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <RoleRoute roles={['admin']}>
-              <UsersPage />
+              <ProtectedLayout mode={mode} toggleTheme={toggleTheme}>
+                <UsersPage />
+              </ProtectedLayout>
             </RoleRoute>
           </ProtectedRoute>
         }
