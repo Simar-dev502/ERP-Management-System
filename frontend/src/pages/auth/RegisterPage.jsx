@@ -1,29 +1,23 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useFormik } from 'formik';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Container, Box, Paper, Typography, TextField, Button, Alert, CircularProgress,
   MenuItem,
 } from '@mui/material';
-import { register } from '../../features/auth/authSlice';
+import useAuth from '../../hooks/useAuth';
+import { registerSchema } from '../../utils/validationSchemas';
 
 const RegisterPage = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'sales' });
+  const { register, isLoading, error, clearError } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const result = await dispatch(register(formData));
-    if (result.meta.requestStatus === 'fulfilled') {
-      navigate('/dashboard');
-    }
-  };
+  const formik = useFormik({
+    initialValues: { name: '', email: '', password: '', role: 'sales' },
+    validationSchema: registerSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      await register(values);
+      setSubmitting(false);
+    },
+  });
 
   return (
     <Container maxWidth="sm">
@@ -33,25 +27,82 @@ const RegisterPage = () => {
             Create Account
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+              {error}
+            </Alert>
+          )}
 
-          <form onSubmit={handleSubmit}>
-            <TextField fullWidth label="Name" name="name" value={formData.name} onChange={handleChange} margin="normal" required />
-            <TextField fullWidth label="Email" name="email" type="email" value={formData.email} onChange={handleChange} margin="normal" required />
-            <TextField fullWidth label="Password" name="password" type="password" value={formData.password} onChange={handleChange} margin="normal" required />
-            <TextField fullWidth select label="Role" name="role" value={formData.role} onChange={handleChange} margin="normal">
+          <form onSubmit={formik.handleSubmit}>
+            <TextField
+              fullWidth
+              label="Name"
+              name="name"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              select
+              label="Role"
+              name="role"
+              value={formik.values.role}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.role && Boolean(formik.errors.role)}
+              helperText={formik.touched.role && formik.errors.role}
+              margin="normal"
+            >
               <MenuItem value="sales">Sales</MenuItem>
               <MenuItem value="purchase">Purchase</MenuItem>
               <MenuItem value="inventory">Inventory</MenuItem>
               <MenuItem value="admin">Admin</MenuItem>
             </TextField>
-            <Button type="submit" fullWidth variant="contained" size="large" disabled={isLoading} sx={{ mt: 2, mb: 2 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={isLoading || formik.isSubmitting}
+              sx={{ mt: 2, mb: 2 }}
+            >
               {isLoading ? <CircularProgress size={24} /> : 'Register'}
             </Button>
           </form>
 
           <Typography variant="body2" align="center">
-            Already have an account? <Link to="/login">Sign In</Link>
+            Already have an account?{' '}
+            <RouterLink to="/login" onClick={clearError}>
+              Sign In
+            </RouterLink>
           </Typography>
         </Paper>
       </Box>
