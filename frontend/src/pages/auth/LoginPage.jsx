@@ -1,28 +1,22 @@
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, Link } from 'react-router-dom';
+import { useFormik } from 'formik';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   Container, Box, Paper, Typography, TextField, Button, Alert, CircularProgress,
 } from '@mui/material';
-import { login } from '../../features/auth/authSlice';
+import useAuth from '../../hooks/useAuth';
+import { loginSchema } from '../../utils/validationSchemas';
 
 const LoginPage = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const { login, isLoading, error, clearError } = useAuth();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const result = await dispatch(login(formData));
-    if (result.meta.requestStatus === 'fulfilled') {
-      navigate('/dashboard');
-    }
-  };
+  const formik = useFormik({
+    initialValues: { email: '', password: '' },
+    validationSchema: loginSchema,
+    onSubmit: async (values, { setSubmitting }) => {
+      await login(values);
+      setSubmitting(false);
+    },
+  });
 
   return (
     <Container maxWidth="sm">
@@ -35,35 +29,43 @@ const LoginPage = () => {
             Sign in to your account
           </Typography>
 
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
+              {error}
+            </Alert>
+          )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={formik.handleSubmit}>
             <TextField
               fullWidth
               label="Email"
               name="email"
               type="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
               margin="normal"
-              required
             />
             <TextField
               fullWidth
               label="Password"
               name="password"
               type="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
               margin="normal"
-              required
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               size="large"
-              disabled={isLoading}
+              disabled={isLoading || formik.isSubmitting}
               sx={{ mt: 2, mb: 2 }}
             >
               {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
@@ -71,7 +73,10 @@ const LoginPage = () => {
           </form>
 
           <Typography variant="body2" align="center">
-            Don't have an account? <Link to="/register">Register</Link>
+            Don't have an account?{' '}
+            <RouterLink to="/register" onClick={clearError}>
+              Register
+            </RouterLink>
           </Typography>
         </Paper>
       </Box>
