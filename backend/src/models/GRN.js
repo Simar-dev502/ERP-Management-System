@@ -65,13 +65,12 @@ const grnSchema = new mongoose.Schema(
   },
 );
 
-grnSchema.pre('save', async function (next) {
+grnSchema.pre('save', async function () {
   if (this.isNew && !this.grnNumber) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('GRN').countDocuments();
     this.grnNumber = `GRN-${dateStr}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 grnSchema.index({ grnNumber: 1, purchaseOrder: 1, createdAt: -1 });

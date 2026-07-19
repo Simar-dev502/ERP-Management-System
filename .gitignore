@@ -34,10 +34,6 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Package lock files (keep root)
-backend/package-lock.json
-frontend/package-lock.json
-
 # Misc
 .cache/
 tmp/

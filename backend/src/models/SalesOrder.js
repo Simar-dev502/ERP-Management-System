@@ -69,21 +69,19 @@ const salesOrderSchema = new mongoose.Schema(
 );
 
 // Auto-generate order number before save
-salesOrderSchema.pre('save', async function (next) {
+salesOrderSchema.pre('save', async function () {
   if (this.isNew && !this.orderNumber) {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const count = await mongoose.model('SalesOrder').countDocuments();
     this.orderNumber = `SO-${dateStr}-${String(count + 1).padStart(4, '0')}`;
   }
-  next();
 });
 
 // Auto-calculate totalPrice
-salesOrderSchema.pre('save', function (next) {
+salesOrderSchema.pre('save', function () {
   if (this.items && this.items.length > 0) {
     this.totalPrice = this.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
   }
-  next();
 });
 
 salesOrderSchema.index({ orderNumber: 1, customer: 1, status: 1, createdAt: -1 });
