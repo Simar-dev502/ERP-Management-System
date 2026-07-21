@@ -1,7 +1,7 @@
 # Render Deployment Configuration
 services:
   - type: web
-    name: erp-system-backend
+    name: erp-management-system-api
     env: node
     region: singapore
     buildCommand: cd backend && npm install
@@ -17,3 +17,5 @@ services:
         sync: false
       - key: JWT_EXPIRE
         value: "30d"
+      - key: CORS_ORIGIN
+        value: https://erp-management-system.vercel.app
